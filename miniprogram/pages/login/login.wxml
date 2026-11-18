@@ -4,20 +4,24 @@
   <view class="sub">基于艾宾浩斯记忆曲线的英语单词记忆学习系统</view>
 
   <view class="ltabs">
-    <view class="lt {{tab === 'user' ? 'on' : ''}}" data-tab="user" bindtap="switchTab">普通用户</view>
-    <view class="lt {{tab === 'admin' ? 'on' : ''}}" data-tab="admin" bindtap="switchTab">管理员</view>
+    <view class="lt {{tab === 'user' ? 'on' : ''}}" data-tab="user" bindtap="switchTab">登录</view>
     <view class="lt {{tab === 'register' ? 'on' : ''}}" data-tab="register" bindtap="switchTab">注册</view>
+    <view class="lt {{tab === 'admin' ? 'on' : ''}}" data-tab="admin" bindtap="switchTab">管理员</view>
   </view>
 
-  <input class="linput" placeholder="账号" value="{{acc}}" bindinput="onAcc" confirm-type="next" />
-  <input class="linput" placeholder="密码" value="{{pwd}}" bindinput="onPwd" password="{{true}}" confirm-type="done" bindconfirm="doLogin" />
+  <view wx:if="{{tab === 'admin'}}" class="small muted" style="margin-bottom:24rpx;line-height:1.7">{{adminReady ? '管理员密码由管理员本人设定并独自保管，页面不显示任何默认密码。' : '这台设备还没有管理员密码，先设一个（至少 6 位）；设好之后只有管理员本人知道。'}}</view>
+
+  <input wx:if="{{tab !== 'admin'}}" class="linput" placeholder="你自己设置的账号" value="{{acc}}" bindinput="onAcc" confirm-type="next" />
+  <input class="linput" placeholder="{{tab === 'admin' && !adminReady ? '设定管理员密码（至少 6 位）' : '密码'}}" value="{{pwd}}" bindinput="onPwd" password="{{true}}" confirm-type="next" bindconfirm="doLogin" />
+  <input wx:if="{{tab === 'admin' && !adminReady}}" class="linput" placeholder="再输入一次" value="{{pwd2}}" bindinput="onPwd2" password="{{true}}" confirm-type="done" bindconfirm="doLogin" />
   <input wx:if="{{tab === 'register'}}" class="linput" placeholder="昵称（选填）" value="{{nick}}" bindinput="onNick" />
 
-  <button class="btn" bindtap="doLogin" style="margin:40rpx 0 0">{{tab === 'register' ? '注册并登录' : '登录'}}</button>
+  <button class="btn" bindtap="doLogin" style="margin:40rpx 0 0">{{tab === 'register' ? '注册并登录' : tab === 'admin' && !adminReady ? '设定密码并进入' : '登录'}}</button>
   <button class="btn soft" bindtap="doGuest" style="margin:20rpx 0 0">游客登录，先看看</button>
 
   <view class="foot">
-    <view>演示账号 student / 123456 · 管理员 admin / admin123</view>
+    <view>普通使用者自己注册账号密码，或用游客登录直接体验</view>
+    <view>管理员密码只在首次进入管理端时由本人设定，站点不展示、也不内置</view>
     <view>纯前端演示版：学习数据保存在小程序本地缓存</view>
   </view>
 </view>

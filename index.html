@@ -107,7 +107,7 @@
       <nav>
         <a href="#clients">三端入口</a>
         <a href="#algo">记忆算法</a>
-        <a href="#demo">演示账号</a>
+        <a href="#demo">进入方式</a>
         <a href="#mini">小程序源码</a>
         <a href="#arch">目录与架构</a>
         <a href="docs/系统设计说明.md">设计文档</a>
@@ -213,17 +213,17 @@
     </section>
 
     <section id="demo">
-      <h2>演示账号</h2>
-      <p class="lead">三端都只有一个登录入口：管理员账号进后台，普通账号进个人中心，也可以直接以游客身份体验（游客数据同样落本机）。</p>
+      <h2>进入方式</h2>
+      <p class="lead">三端共用一个登录入口，三种走法：注册（自己填账号和密码）、登录（用已注册的账号）、游客登录（免注册直接体验）。</p>
       <table>
-        <thead><tr><th>身份</th><th>账号</th><th>密码</th><th>能做什么</th></tr></thead>
+        <thead><tr><th>身份</th><th>怎么进</th><th>能做什么</th></tr></thead>
         <tbody>
-          <tr><td>管理员</td><td class="mono">admin</td><td class="mono">admin123</td><td>用户管理、词库增删与批量导入、公告、参数查看、数据复位</td></tr>
-          <tr><td>普通用户</td><td class="mono">student</td><td class="mono">123456</td><td>学习 / 复习 / 测试 / 收藏 / 统计 / 个人设置</td></tr>
-          <tr><td>游客</td><td class="mono">—</td><td class="mono">—</td><td>点击「游客进入」，功能与用户一致，进度存在游客桶</td></tr>
+          <tr><td>管理员</td><td>切到「管理员」标签输入密码；换到新设备首次进入时先由本人设定密码</td><td>用户管理、词库增删与批量导入、公告、参数查看、数据复位</td></tr>
+          <tr><td>普通用户</td><td>点「注册」自己设账号与密码，之后用同一账号登录</td><td>学习 / 复习 / 测试 / 收藏 / 统计 / 个人设置</td></tr>
+          <tr><td>游客</td><td>点「游客登录，先看看」</td><td>功能与普通用户一致，进度存在本机游客桶</td></tr>
         </tbody>
       </table>
-      <p class="note">注册账号使用同一入口，密码在本机做非加密性哈希后保存；本系统为教学演示，不接后端、不联网鉴权。</p>
+      <p class="note">站点是纯前端：口令在本机做哈希后保存在 <code>localStorage</code>，不上传、不联网鉴权。管理员密码由管理员本人在首次进入管理端时设定并独自保管，页面和代码里都不含默认口令，任何人打开登录页都看不到它。</p>
     </section>
 
     <section id="mini">
@@ -234,7 +234,7 @@
             <li><b>下载源码。</b>把仓库 <code>miniprogram/</code> 目录保存到本地（整个仓库克隆下来也可以）。</li>
             <li><b>打开开发者工具。</b>微信开发者工具 → 导入项目 → 目录选 <code>miniprogram/</code>，AppID 选「测试号」即可（工程里写的是 <code>touristappid</code>）。</li>
             <li><b>关掉域名校验。</b>详情 → 本地设置 → 取消「校验请求域名」（发音走 <code>dict.youdao.com</code>，属于第三方域名）。</li>
-            <li><b>编译运行。</b>登录页输入 <code>student / 123456</code>，或点「游客进入」；用 <code>admin / admin123</code> 可进管理员页。</li>
+            <li><b>编译运行。</b>登录页点「注册」自己设一个账号密码，或点「游客登录，先看看」；要进管理端就切到「管理员」标签，首次进入时自行设定密码。</li>
             <li><b>真机预览。</b>点预览扫码，手机微信即可操作；底部标签栏为首页 / 学习 / 复习 / 测试 / 我的。</li>
           </ol>
           <p class="note">
@@ -265,7 +265,7 @@
 ├─ m/                    手机网页版（小程序同款 UI）
 ├─ miniprogram/          微信小程序工程（app.json + 8 个页面 + utils/）
 ├─ docs/系统设计说明.md   架构、数据模型、算法、流程与测试用例
-└─ tools/selfcheck.js    小程序端自检脚本：node tools/selfcheck.js → 83 项断言</pre>
+└─ tools/selfcheck.js    小程序端自检脚本：node tools/selfcheck.js → 95 项断言</pre>
         </div>
         <div class="card">
           <h3>分层约定</h3>

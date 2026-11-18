@@ -182,6 +182,10 @@
   var K_USERS = 'wm_users';
   var K_SESSION = 'wm_session';
   var K_CMS = 'wm_cms';
+  var K_SEED = 'wm_seed_ver';
+  var ADMIN_UID = 'u_admin';
+  /* 2 = 去掉内置演示账号、管理员口令改为本人设定 */
+  var SEED_VER = 2;
 
   /* 演示用口令散列：静态站点没有服务端，仅做不可读化处理，不具备真实安全性 */
   function hash(pw) {
@@ -200,26 +204,19 @@
     return Math.random().toString(36).slice(2, 6);
   }
 
+  /**
+   * 只放一个管理员骨架，pwd 为空表示口令尚未设定。
+   * 代码与页面上都不存在默认口令，管理员口令由本人在首次进入管理端时设定并独自保管。
+   */
   function seedUsers() {
     return [
       {
-        uid: 'u_admin',
+        uid: ADMIN_UID,
         account: 'admin',
         nickname: '系统管理员',
         role: 'admin',
-        pwd: hash('admin123'),
+        pwd: null,
         avatarColor: '#3b6ef5',
-        bank: 'cet4',
-        createdAt: now(),
-        status: 1
-      },
-      {
-        uid: 'u_demo',
-        account: 'student',
-        nickname: '演示同学',
-        role: 'user',
-        pwd: hash('123456'),
-        avatarColor: '#07c160',
         bank: 'cet4',
         createdAt: now(),
         status: 1
@@ -227,13 +224,25 @@
     ];
   }
 
+  /** 旧版本把演示账号和默认口令写进了本机，升级时丢掉它们，保留自行注册的账号 */
+  function migrateUsers(list) {
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var u = list[i];
+      if (u.uid === ADMIN_UID || u.uid === 'u_demo') continue;
+      out.push(u);
+    }
+    return seedUsers().concat(out);
+  }
+
   var Auth = {
     hash: hash,
     users: function () {
       var list = Store.get(K_USERS, null);
-      if (!list || !list.length) {
-        list = seedUsers();
+      if (!list || !list.length || Store.get(K_SEED, 0) < SEED_VER) {
+        list = migrateUsers(list || []);
         Store.set(K_USERS, list);
+        Store.set(K_SEED, SEED_VER);
       }
       return list;
     },
@@ -256,6 +265,7 @@
       var u = this.findByAccount(account);
       if (!u) return { ok: false, msg: '账号不存在，可先注册' };
       if (u.status === 0) return { ok: false, msg: '该账号已被管理员停用' };
+      if (!u.pwd) return { ok: false, msg: '管理员密码尚未设定，请先设置密码', needSet: true };
       if (u.pwd !== hash(pwd)) return { ok: false, msg: '密码不正确' };
       if (expectRole && u.role !== expectRole) return { ok: false, msg: '该账号不是' + (expectRole === 'admin' ? '管理员' : '普通用户') + '账号' };
       this.setSession(u);
@@ -283,6 +293,32 @@
       this.saveUsers(list);
       this.setSession(u);
       return { ok: true, msg: '注册成功', user: u };
+    },
+    /** 管理员账号名（本机唯一，供管理端登录使用） */
+    adminAccount: function () {
+      var u = this.findByUid(ADMIN_UID);
+      return u ? u.account : 'admin';
+    },
+    /** 管理员口令是否已由本人设定（未设定时管理端入口显示「设定密码」） */
+    adminReady: function () {
+      var u = this.findByUid(ADMIN_UID);
+      return !!(u && u.pwd);
+    },
+    /** 首次进入管理端时由本人设定口令，两次输入一致才写入，成功后直接登录 */
+    setAdminPwd: function (pwd, confirm) {
+      if (String(pwd || '').length < 6) return { ok: false, msg: '管理员密码至少 6 位' };
+      if (pwd !== confirm) return { ok: false, msg: '两次输入的密码不一致' };
+      var list = this.users();
+      var admin = null;
+      for (var i = 0; i < list.length; i++) if (list[i].uid === ADMIN_UID) admin = list[i];
+      if (!admin) {
+        admin = seedUsers()[0];
+        list.push(admin);
+      }
+      admin.pwd = hash(pwd);
+      this.saveUsers(list);
+      this.setSession(admin);
+      return { ok: true, msg: '管理员密码已设定', user: admin };
     },
     /** 游客进入：无需账号，学习进度以游客身份保存在本地 */
     guest: function () {
@@ -697,9 +733,10 @@
       d.notice = text;
       this.save(d);
     },
-    /** 清空全部本地数据（演示复位） */
+    /** 清空全部本地数据（演示复位）：账号回到只有未设口令的管理员骨架 */
     resetAll: function () {
       Store.remove(K_USERS);
+      Store.remove(K_SEED);
       Store.remove(K_SESSION);
       Store.remove(K_CMS);
       var doomed = [];

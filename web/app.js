@@ -94,20 +94,38 @@
       '</section>' +
       '<section class="login-panel"><div class="card">' +
       '<h3>登录系统</h3><p class="tip">' +
-      (isGuest ? '你正以游客身份浏览，登录后进度将与账号绑定。' : '请选择身份进入。管理员可维护词库与用户。') +
+      (loginTab === 'admin'
+        ? (C.Auth.adminReady()
+            ? '管理员密码由管理员本人设定并独自保管，这里不会显示任何默认密码。'
+            : '这台设备还没有管理员密码。先设一个（至少 6 位），设好之后只有你自己知道。')
+        : isGuest
+          ? '你正以游客身份浏览，登录后进度将与账号绑定。'
+          : loginTab === 'register'
+            ? '自己填账号和密码，注册后立即可用，进度跟着账号存在本机。'
+            : '用你自己注册的账号密码登录；还没有账号就点「注册」。') +
       '</p>' +
       '<div class="tabs">' +
-      '<button data-action="login-tab" data-tab="user" class="' + (loginTab === 'user' ? 'on' : '') + '">普通用户</button>' +
+      '<button data-action="login-tab" data-tab="user" class="' + (loginTab === 'user' ? 'on' : '') + '">登录</button>' +
+      '<button data-action="login-tab" data-tab="register" class="' + (loginTab === 'register' ? 'on' : '') + '">注册</button>' +
       '<button data-action="login-tab" data-tab="admin" class="' + (loginTab === 'admin' ? 'on' : '') + '">管理员</button>' +
       '</div>' +
-      '<div class="field"><label>账号</label><input id="lg-acc" placeholder="' +
-      (loginTab === 'admin' ? 'admin' : 'student 或你自己注册的账号') +
-      '" autocomplete="username" /></div>' +
-      '<div class="field"><label>密码</label><input id="lg-pwd" type="password" placeholder="请输入密码" autocomplete="current-password" /></div>' +
+      (loginTab === 'admin'
+        ? ''
+        : '<div class="field"><label>账号</label><input id="lg-acc" placeholder="' +
+          (loginTab === 'register' ? '3-20 位字母、数字或下划线' : '你自己设置的账号') +
+          '" autocomplete="username" /></div>') +
+      '<div class="field"><label>密码</label><input id="lg-pwd" type="password" placeholder="' +
+      (C.Auth.adminReady() ? '请输入密码' : '至少 6 位，只有你知道') +
+      '" autocomplete="current-password" /></div>' +
+      (loginTab === 'admin' && !C.Auth.adminReady()
+        ? '<div class="field"><label>确认密码</label><input id="lg-pwd2" type="password" placeholder="再输入一次" autocomplete="new-password" /></div>'
+        : '') +
       '<div class="field"' + (loginTab === 'register' ? '' : ' hidden') + '><label>昵称（选填）</label><input id="lg-nick" placeholder="学习伙伴都这么称呼你" /></div>' +
       '<div class="err" id="lg-err"></div>' +
       '<button class="btn block" data-action="do-login">' +
-      (loginTab === 'register' ? '注册并进入' : loginTab === 'admin' ? '以管理员身份登录' : '登录') +
+      (loginTab === 'register'
+        ? '注册并进入'
+        : loginTab === 'admin' && !C.Auth.adminReady() ? '设定密码并进入管理后台' : loginTab === 'admin' ? '以管理员身份登录' : '登录') +
       '</button>' +
       '<div class="row" style="margin-top:12px">' +
       (loginTab === 'register'
@@ -116,33 +134,41 @@
       '<span class="spacer"></span>' +
       '<button class="btn soft sm" data-action="do-guest">游客登录，先看看</button>' +
       '</div>' +
-      '<div class="hint-box">演示账号 · 管理员 <code>admin / admin123</code><br/>普通用户 <code>student / 123456</code>，也可以自行注册。</div>' +
+      '<div class="hint-box">三种进入方式：「注册」自己设账号密码，「登录」用已有账号，「游客登录」免注册直接体验。<br/>管理员密码只由管理员本人在首次进入时设定并保管，站点不展示、也不内置任何默认密码。</div>' +
       '</div></section>';
-    var acc = $('#lg-acc');
-    if (acc) {
-      acc.focus();
-      $('#lg-pwd').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') doLogin();
-      });
-      acc.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') doLogin();
+    var first = $('#lg-acc') || $('#lg-pwd');
+    if (first) {
+      first.focus();
+      ['#lg-acc', '#lg-pwd', '#lg-pwd2', '#lg-nick'].forEach(function (sel) {
+        var el = $(sel);
+        if (el) {
+          el.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') doLogin();
+          });
+        }
       });
     }
   }
 
   function doLogin() {
-    var acc = $('#lg-acc').value.trim();
-    var pwd = $('#lg-pwd').value;
     var err = $('#lg-err');
+    var pwd = $('#lg-pwd') ? $('#lg-pwd').value : '';
     var r;
-    if (loginTab === 'register') {
-      r = C.Auth.register(acc, pwd, $('#lg-nick') ? $('#lg-nick').value : '');
+    if (loginTab === 'admin') {
+      r = C.Auth.adminReady()
+        ? C.Auth.login(C.Auth.adminAccount(), pwd, 'admin')
+        : C.Auth.setAdminPwd(pwd, $('#lg-pwd2') ? $('#lg-pwd2').value : '');
     } else {
-      r = C.Auth.login(acc, pwd, loginTab === 'admin' ? 'admin' : null);
-      if (r.ok && loginTab === 'user' && r.user.role === 'admin') {
-        err.textContent = '这是管理员账号，请切换到管理员标签登录';
-        C.Auth.logout();
-        return;
+      var acc = $('#lg-acc') ? $('#lg-acc').value.trim() : '';
+      if (loginTab === 'register') {
+        r = C.Auth.register(acc, pwd, $('#lg-nick') ? $('#lg-nick').value : '');
+      } else {
+        r = C.Auth.login(acc, pwd, null);
+        if (r.ok && loginTab === 'user' && r.user.role === 'admin') {
+          err.textContent = '这是管理员账号，请切换到管理员标签登录';
+          C.Auth.logout();
+          return;
+        }
       }
     }
     if (!r.ok) return void (err.textContent = r.msg);
@@ -1170,7 +1196,7 @@
       case 'reset-pwd': {
         var uid = el.getAttribute('data-uid');
         var nu = C.Auth.findByUid(uid);
-        var np = prompt('为账号 ' + nu.account + ' 设置新密码（至少 6 位）', 'wm123456');
+        var np = prompt('为账号 ' + nu.account + ' 设置新密码（至少 6 位）');
         if (np === null) break;
         var r = C.Auth.resetPwd(uid, np);
         toast(r.msg || (r.ok ? '密码已重置' : '失败'));

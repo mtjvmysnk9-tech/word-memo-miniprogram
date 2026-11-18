@@ -3,7 +3,15 @@ PASS app.js loads :: null
 PASS 8 pages registered :: login,home,study,review,quiz,mine,stats,admin
 PASS no page load errors :: 
 PASS launch redirects to login :: reLaunch:/pages/login/login
-PASS student login :: 登录成功
+PASS ships without any default password :: ["admin"]
+PASS legacy admin123 rejected :: 管理员密码尚未设定，请先设置密码
+PASS short admin password rejected
+PASS mismatched admin password rejected
+PASS owner sets admin password
+PASS admin password now required
+PASS wrong admin password rejected
+PASS admin logs in with own password
+PASS user registers own account :: 注册成功
 PASS refresh returns true
 PASS home bankName :: 四级高频
 PASS home freshCount :: 364
@@ -36,12 +44,12 @@ PASS quiz scopes 5 :: [364,20,5,10,0]
 PASS quiz spelling off
 PASS quiz question view :: quiz
 PASS quiz result view :: result
-PASS quiz rate sane :: 40
-PASS quiz tracked :: {"new":25,"review":0,"quiz":5,"minutes":7.5}
-PASS quiz wronglist is array :: 3
-PASS mine name :: 演示同学
+PASS quiz rate sane :: 20
+PASS quiz tracked :: {"new":23,"review":2,"quiz":5,"minutes":7.5}
+PASS quiz wronglist is array :: 4
+PASS mine name :: 自学者
 PASS mine not admin
-PASS mine bucket :: wm_profile_u_demo
+PASS mine bucket :: wm_profile_u_mwmg09fjvwj9
 PASS goal saved :: 30
 PASS mine bank change :: cet6
 PASS pwd changed
@@ -49,7 +57,7 @@ PASS stats bars 14
 PASS stats heat 40
 PASS stats stages 9
 PASS stats logs :: 1
-PASS stats learned > 0 :: 25
+PASS stats learned > 0 :: 23
 PASS stats minutes > 0 :: 8
 PASS stats dist 4
 PASS admin overview :: 2
@@ -57,7 +65,7 @@ PASS admin bankRows 3 :: [332,364,198]
 PASS admin users list :: 2
 PASS reset pwd toast :: toast:已重置
 PASS status toggled :: 0
-PASS word added :: [{"id":"x_mwmdw6s03l9w_0","word":"meticulous","phonetic":"","meaning":"adj. 一丝不苟的","example":""}]
+PASS word added :: [{"id":"x_mwmgafxz3jvt_0","word":"meticulous","phonetic":"","meaning":"adj. 一丝不苟的","example":""}]
 PASS catalog grew :: 895
 PASS csv import result :: toast:导入 1 词，跳过 0 词
 PASS delWord removes one :: ["serendipity"]
@@ -67,20 +75,24 @@ PASS catalog back to 894 :: 894
 PASS sys intervals 9
 PASS sys env words :: wx.setStorageSync · 词库 894 词 · 1.0.0
 PASS notice saved :: 自检公告
-PASS learnWord writes numeric dueAt :: 1795022537520
-PASS learnWord writes numeric lastAt :: 1795022237520
+PASS learnWord writes numeric dueAt :: 1795026561815
+PASS learnWord writes numeric lastAt :: 1795026261815
 PASS untilDue readable :: 4 分钟后
 PASS logout redirects
-PASS login prefills admin :: {"tab":"admin","acc":"admin","pwd":"admin123","nick":""}
+PASS login page shows no credential :: {"tab":"admin","acc":"","pwd":"","pwd2":"","nick":"","adminReady":true}
+PASS admin tab verifies password :: toast:密码不正确
 PASS register via page :: 3
 PASS guest enters
 PASS guest bucket
 PASS backend is wx storage :: wx.setStorageSync
-PASS wx storage written :: wm_users,wm_profile_u_demo,wm_cms,wm_session
-PASS profile reloads from wx :: 25
+PASS wx storage written :: wm_users,wm_seed_ver,wm_profile_u_mwmg09fjvwj9,wm_cms,wm_session
+PASS profile reloads from wx :: 23
 PASS account survives reload :: {"a":"newbie","r":"user"}
-PASS uid unique per ms :: u_admin,u_demo,u_mwmdw6s0b8a9
+PASS uid unique per ms :: u_admin,u_mwmg09fjvwj9,u_mwmgafxz5n2m
 PASS reset wipes wx storage :: 
-PASS reset reseeds accounts :: 2
+PASS reset reseeds admin skeleton :: admin
+PASS legacy demo account dropped :: admin,keeper
+PASS legacy admin password cleared
+PASS self-registered account survives upgrade :: 2
 
->>> all 83 checks passed
+>>> all 95 checks passed

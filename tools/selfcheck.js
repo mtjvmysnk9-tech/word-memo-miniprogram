@@ -91,8 +91,22 @@ CORE.CMS.resetAll();
 appInstance.onLaunch();
 ok('launch redirects to login', navs().indexOf('reLaunch:/pages/login/login') >= 0, navs());
 
-const r = CORE.Auth.login('student', '123456');
-ok('student login', r.ok, r.msg);
+const ADMIN_PWD = 'own-pwd-8';
+ok('ships without any default password', CORE.Auth.users().length === 1 && CORE.Auth.adminReady() === false, JSON.stringify(CORE.Auth.users().map((u) => u.account)));
+const legacy = CORE.Auth.login('admin', 'admin123');
+ok('legacy admin123 rejected', legacy.ok === false && legacy.needSet === true, legacy.msg);
+ok('short admin password rejected', CORE.Auth.setAdminPwd('123', '123').ok === false);
+ok('mismatched admin password rejected', CORE.Auth.setAdminPwd(ADMIN_PWD, 'other-99').ok === false);
+ok('owner sets admin password', CORE.Auth.setAdminPwd(ADMIN_PWD, ADMIN_PWD).ok === true);
+ok('admin password now required', CORE.Auth.adminReady() === true);
+CORE.Auth.logout();
+ok('wrong admin password rejected', CORE.Auth.login('admin', 'admin123', 'admin').ok === false);
+ok('admin logs in with own password', CORE.Auth.login('admin', ADMIN_PWD, 'admin').ok === true);
+CORE.Auth.logout();
+const reg = CORE.Auth.register('learner', 'pw123456', '自学者');
+ok('user registers own account', reg.ok, reg.msg);
+const DEMO_UID = reg.user.uid;
+CORE.Auth.update(DEMO_UID, { bank: 'cet4' });
 ok('refresh returns true', appInstance.refresh() === true);
 
 /* ---------------------------------------------------------------- 首页 */
@@ -184,7 +198,7 @@ ok('quiz wronglist is array', Array.isArray(quiz.data.wrongList), quiz.data.wron
 /* ---------------------------------------------------------------- 我的 */
 const mine = makePage('mine');
 mine.onShow();
-ok('mine name', mine.data.name === '演示同学', mine.data.name);
+ok('mine name', mine.data.name === '自学者', mine.data.name);
 ok('mine not admin', mine.data.isAdmin === false);
 ok('mine bucket', mine.data.bucket.indexOf('wm_profile_') === 0, mine.data.bucket);
 mine.onGoal({ detail: { value: '30' } });
@@ -193,9 +207,9 @@ mine.onBankChange({ detail: { value: '2' } });
 ok('mine bank change', appInstance.globalData.bank === 'cet6', appInstance.globalData.bank);
 appInstance.globalData.bank = 'cet4';
 mine.changePwd();
-ok('pwd changed', CORE.Auth.login('student', 'newpass123').ok);
-CORE.Auth.resetPwd('u_demo', '123456');
-CORE.Auth.login('student', '123456');
+ok('pwd changed', CORE.Auth.login('learner', 'newpass123').ok);
+CORE.Auth.resetPwd(DEMO_UID, 'pw123456');
+CORE.Auth.login('learner', 'pw123456');
 appInstance.refresh();
 
 /* ---------------------------------------------------------------- 统计 */
@@ -210,7 +224,7 @@ ok('stats minutes > 0', stats.data.minutes > 0, stats.data.minutes);
 ok('stats dist 4', stats.data.dist.length === 4);
 
 /* ------------------------------------------------------------ 管理后台 */
-CORE.Auth.login('admin', 'admin123');
+CORE.Auth.login('admin', ADMIN_PWD);
 appInstance.refresh();
 const admin = makePage('admin');
 admin.onShow();
@@ -218,11 +232,11 @@ ok('admin overview', admin.data.totalUsers >= 2, admin.data.totalUsers);
 ok('admin bankRows 3', admin.data.bankRows.length === 3, JSON.stringify(admin.data.bankRows.map((b) => b.count)));
 admin.switchTab({ currentTarget: { dataset: { tab: 'users' } } });
 ok('admin users list', admin.data.users.length >= 2, admin.data.users.length);
-admin.resetPwd({ currentTarget: { dataset: { uid: 'u_demo' } } });
+admin.resetPwd({ currentTarget: { dataset: { uid: DEMO_UID } } });
 ok('reset pwd toast', navs().indexOf('已重置') >= 0, navLog.slice(-1)[0]);
-admin.toggleStatus({ currentTarget: { dataset: { uid: 'u_demo' } } });
-ok('status toggled', CORE.Auth.findByUid('u_demo').status === 0, CORE.Auth.findByUid('u_demo').status);
-CORE.Auth.setStatus('u_demo', 1);
+admin.toggleStatus({ currentTarget: { dataset: { uid: DEMO_UID } } });
+ok('status toggled', CORE.Auth.findByUid(DEMO_UID).status === 0, CORE.Auth.findByUid(DEMO_UID).status);
+CORE.Auth.setStatus(DEMO_UID, 1);
 admin.switchTab({ currentTarget: { dataset: { tab: 'words' } } });
 admin.onField({ currentTarget: { dataset: { f: 'wWord' } }, detail: { value: 'meticulous' } });
 admin.onField({ currentTarget: { dataset: { f: 'wMean' } }, detail: { value: 'adj. 一丝不苟的' } });
@@ -255,9 +269,12 @@ mine2.logout();
 ok('logout redirects', navs().indexOf('reLaunch:/pages/login/login') >= 0);
 const login = makePage('login');
 login.switchTab({ currentTarget: { dataset: { tab: 'admin' } } });
-ok('login prefills admin', login.data.acc === 'admin' && login.data.pwd === 'admin123', JSON.stringify(login.data));
-login.setData({ acc: 'newbie', pwd: 'abc123', nick: '新同学' });
+ok('login page shows no credential', login.data.acc === '' && login.data.pwd === '' && login.data.adminReady === true, JSON.stringify(login.data));
+login.setData({ pwd: 'wrong-pwd-1' });
+login.doLogin();
+ok('admin tab verifies password', navLog.slice(-1)[0] === 'toast:密码不正确', navLog.slice(-1)[0]);
 login.switchTab({ currentTarget: { dataset: { tab: 'register' } } });
+login.setData({ acc: 'newbie', pwd: 'abc123', nick: '新同学' });
 login.doLogin();
 ok('register via page', !!CORE.Auth.findByAccount('newbie'), CORE.Auth.users().length);
 login.doGuest();
@@ -268,14 +285,26 @@ ok('guest bucket', CORE.Repo.load('guest') !== null);
 ok('backend is wx storage', CORE.Store.backend === 'wx.setStorageSync', CORE.Store.backend);
 const savedKeys = Object.keys(store);
 ok('wx storage written', savedKeys.length >= 3, savedKeys.join(','));
-const reloaded = CORE.Repo.load('u_demo');
+const reloaded = CORE.Repo.load(DEMO_UID);
 ok('profile reloads from wx', !!reloaded && Object.keys(reloaded.words).length >= 20, reloaded && Object.keys(reloaded.words).length);
 const reAuth = CORE.Auth.findByAccount('newbie');
 ok('account survives reload', !!reAuth && reAuth.role === 'user', JSON.stringify(reAuth && { a: reAuth.account, r: reAuth.role }));
 ok('uid unique per ms', new Set(CORE.Auth.users().map((u) => u.uid)).size === CORE.Auth.users().length, CORE.Auth.users().map((u) => u.uid).join(','));
 CORE.CMS.resetAll();
 ok('reset wipes wx storage', Object.keys(store).length === 0, Object.keys(store).join(','));
-ok('reset reseeds accounts', CORE.Auth.users().length === 2, CORE.Auth.users().length);
+ok('reset reseeds admin skeleton', CORE.Auth.users().length === 1 && CORE.Auth.adminReady() === false, CORE.Auth.users().map((u) => u.account).join(','));
+
+/* -------------------------------------------------- 旧版本本机数据升级 */
+delete store.wm_seed_ver;
+store.wm_users = JSON.stringify([
+  { uid: 'u_admin', account: 'admin', role: 'admin', nickname: '系统管理员', pwd: CORE.Auth.hash('admin123') },
+  { uid: 'u_demo', account: 'student', role: 'user', nickname: '演示同学', pwd: CORE.Auth.hash('123456') },
+  { uid: 'u_m9xk1abc', account: 'keeper', role: 'user', nickname: '自己注册的同学', pwd: CORE.Auth.hash('pw123456') }
+]);
+const migrated = CORE.Auth.users();
+ok('legacy demo account dropped', !CORE.Auth.findByAccount('student'), migrated.map((u) => u.account).join(','));
+ok('legacy admin password cleared', CORE.Auth.adminReady() === false);
+ok('self-registered account survives upgrade', !!CORE.Auth.findByAccount('keeper'), migrated.length);
 
 const fails = LOG.filter((l) => l.indexOf('FAIL') === 0);
 say('');

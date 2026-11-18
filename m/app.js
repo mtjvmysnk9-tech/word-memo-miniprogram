@@ -119,26 +119,29 @@
     $('#tabbar').hidden = true;
     $('#nav-back').hidden = true;
     $('#nav-title').textContent = '登录';
+    var adminPending = loginTab === 'admin' && !C.Auth.adminReady();
     $('#page').innerHTML =
       '<div class="login">' +
       '<div class="logo">忆</div>' +
       '<h2>忆单词</h2>' +
       '<div class="sub">基于艾宾浩斯记忆曲线的英语单词记忆系统</div>' +
       '<div class="tabs">' +
-      '<button data-action="log-tab" data-tab="user" class="' + (loginTab === 'user' ? 'on' : '') + '">普通用户</button>' +
+      '<button data-action="log-tab" data-tab="user" class="' + (loginTab === 'user' ? 'on' : '') + '">登录</button>' +
+      '<button data-action="log-tab" data-tab="register" class="' + (loginTab === 'register' ? 'on' : '') + '">注册</button>' +
       '<button data-action="log-tab" data-tab="admin" class="' + (loginTab === 'admin' ? 'on' : '') + '">管理员</button>' +
-      (loginTab === 'register' ? '<button class="on" data-action="log-tab" data-tab="register">注册</button>' : '') +
       '</div>' +
-      '<input class="in" id="lg-acc" placeholder="账号" value="' + (loginTab === 'admin' ? 'admin' : '') + '" autocapitalize="off" />' +
+      (loginTab === 'admin' ? '' : '<input class="in" id="lg-acc" placeholder="你自己设置的账号" autocapitalize="off" /><div class="gap"></div>') +
+      '<input class="in" id="lg-pwd" type="password" placeholder="' + (adminPending ? '设定管理员密码（至少 6 位）' : '密码') + '" />' +
       '<div class="gap"></div>' +
-      '<input class="in" id="lg-pwd" type="password" placeholder="密码" value="' + (loginTab === 'admin' ? 'admin123' : '') + '" />' +
-      '<div class="gap"></div>' +
+      (adminPending ? '<input class="in" id="lg-pwd2" type="password" placeholder="再输入一次" /><div class="gap"></div>' : '') +
       (loginTab === 'register' ? '<input class="in" id="lg-nick" placeholder="昵称（选填）" /><div class="gap"></div>' : '') +
-      '<button class="btn block" data-action="do-login">' + (loginTab === 'register' ? '注册并登录' : '登录') + '</button>' +
+      '<button class="btn block" data-action="do-login">' +
+      (loginTab === 'register' ? '注册并登录' : adminPending ? '设定密码并进入管理端' : '登录') +
+      '</button>' +
       '<div class="or">— 其他方式 —</div>' +
       '<button class="btn soft block" data-action="do-guest"><span class="mini">游客登录，先看看</span></button>' +
       (loginTab === 'register' ? '' : '<button class="btn ghost block" style="margin-top:10px" data-action="log-tab" data-tab="register">注册新账号</button>') +
-      '<div class="foot">演示账号 student / 123456 · 管理员 admin / admin123<br>纯前端演示，数据仅保存在本机</div>' +
+      '<div class="foot">账号与密码由使用者自己设置；管理员密码在首次进入管理端时由管理员本人设定，任何页面都不会显示<br>纯前端演示，数据仅保存在本机</div>' +
       '</div>';
   }
 
@@ -794,13 +797,20 @@
         renderLogin();
       },
       'do-login': function () {
-        var acc = $('#lg-acc').value.trim();
         var pwd = $('#lg-pwd').value;
         var r;
-        if (loginTab === 'register') {
-          r = C.Auth.register(acc, pwd, $('#lg-nick') ? $('#lg-nick').value : '');
+        if (loginTab === 'admin') {
+          r = C.Auth.adminReady()
+            ? C.Auth.login(C.Auth.adminAccount(), pwd, 'admin')
+            : C.Auth.setAdminPwd(pwd, $('#lg-pwd2') ? $('#lg-pwd2').value : '');
+        } else if (loginTab === 'register') {
+          r = C.Auth.register($('#lg-acc').value.trim(), pwd, $('#lg-nick') ? $('#lg-nick').value : '');
         } else {
-          r = C.Auth.login(acc, pwd, loginTab === 'admin' ? 'admin' : null);
+          r = C.Auth.login($('#lg-acc').value.trim(), pwd, null);
+          if (r.ok && r.user.role === 'admin') {
+            C.Auth.logout();
+            return toast('这是管理员账号，请切到「管理员」标签登录');
+          }
         }
         if (!r.ok) return toast(r.msg);
         toast(r.msg, true);
@@ -903,7 +913,7 @@
       'data-bucket': function () { toast('数据键 wm_profile_' + (S.user ? S.user.uid : 'guest')); },
       'admin-tab': function () { S.adminTab = el.getAttribute('data-tab'); render(); },
       'u-pwd': function () {
-        promptBox('重置密码', '为该用户设置新密码', '123456', 'text', function (v) {
+        promptBox('重置密码', '为该用户设置新密码（至少 6 位）', '', 'password', function (v) {
           var r = C.Auth.resetPwd(el.getAttribute('data-uid'), v);
           toast(r.ok ? '已重置' : r.msg, r.ok);
         });
