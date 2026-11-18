@@ -1,0 +1,102 @@
+<view class="wrap">
+  <!-- ① 组卷设置 -->
+  <block wx:if="{{view === 'setup'}}">
+    <view class="card">
+      <view class="card-title">自动组卷</view>
+      <view class="muted small">从选定范围抽词，四种题型轮换出题；答错自动进入错词本并降级记忆阶段。</view>
+    </view>
+
+    <view class="group-title">出题范围</view>
+    <view class="group">
+      <view wx:for="{{scopes}}" wx:key="id" class="cell" data-id="{{item.id}}" bindtap="pickScope">
+        <view class="bd"><view class="t">{{item.t}}</view></view>
+        <view class="ft">{{item.n}} 词 {{item.on ? '✓' : ''}}</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">题量</view>
+      <view class="chips">
+        <view wx:for="{{counts}}" wx:key="*this" class="chip {{count === item ? 'on' : ''}}" data-n="{{item}}" bindtap="pickCount">{{item}} 题</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">题型</view>
+      <view class="chips">
+        <view wx:for="{{types}}" wx:key="id" class="chip {{item.on ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleType">{{item.name}}</view>
+      </view>
+    </view>
+
+    <button class="btn" bindtap="start">开始测试</button>
+  </block>
+
+  <!-- ② 答题 -->
+  <block wx:elif="{{view === 'quiz'}}">
+    <view class="card" style="margin-bottom:0">
+      <view class="spread">
+        <text class="muted small">第 {{qIndex}} / {{qTotal}} 题</text>
+        <text class="muted small">已答对 {{qScore}}</text>
+      </view>
+      <view class="track" style="margin-top:14rpx"><i style="width:{{barPct}}%"></i></view>
+    </view>
+
+    <view class="card">
+      <view class="tag">{{typeName}}</view>
+      <view class="q-stem" style="font-size:36rpx;line-height:1.6;margin:16rpx 0">{{stem}}</view>
+      <view wx:if="{{isSpelling}}" style="text-align:center;color:#888;font-size:44rpx;letter-spacing:8rpx;margin:20rpx 0">{{hint}}</view>
+      <button wx:if="{{!isSpelling}}" class="btn soft" style="margin:0 0 10rpx" bindtap="playAudio">播放发音</button>
+      <input wx:if="{{isSpelling}}" class="linput" style="border:1rpx solid #e6e6e6;border-radius:12rpx" placeholder="输入单词后提交"
+        value="{{answerText}}" bindinput="onText" bindconfirm="submitText" confirm-type="done" />
+      <button wx:if="{{isSpelling && !shown}}" class="btn" style="margin:16rpx 0 0" bindtap="submitText">提交答案</button>
+    </view>
+
+    <view wx:for="{{options}}" wx:key="i" class="opt {{item.cls}}" data-i="{{item.i}}" bindtap="choose">
+      <view class="i">{{item.letter}}</view>
+      <view class="o">{{item.text}}</view>
+    </view>
+
+    <view wx:if="{{shown}}" class="explain">
+      <view class="bold green">正确答案：{{explain}}</view>
+      <view style="margin-top:8rpx">{{explainMeaning}}</view>
+    </view>
+
+    <view class="btn-row" wx:if="{{shown}}">
+      <button class="btn" bindtap="next">{{qIndex === qTotal ? '查看成绩' : '下一题'}}</button>
+    </view>
+    <view class="btn-row" wx:else>
+      <button class="btn ghost" bindtap="quit">退出测试</button>
+    </view>
+  </block>
+
+  <!-- ③ 成绩 -->
+  <block wx:else>
+    <view class="result">
+      <view class="ring-wrap">
+        <view class="ring-txt">
+          <view class="p">{{rate}}</view>
+          <view class="q">得分</view>
+        </view>
+      </view>
+      <view style="font-size:34rpx;font-weight:500">{{right}} / {{qTotal}} 题正确</view>
+      <view class="muted small" style="margin-top:10rpx">用时 {{seconds}} 秒 · 结果已计入学习统计</view>
+    </view>
+
+    <block wx:if="{{wrongList.length}}">
+      <view class="group-title">错题回顾</view>
+      <view class="group">
+        <view class="wline" wx:for="{{wrongList}}" wx:key="id">
+          <view class="w">{{item.word}}</view>
+          <view class="m">{{item.meaning}}</view>
+          <view class="spk" data-w="{{item.word}}" bindtap="speakWord">♪</view>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="notice">全部答对，继续保持！</view>
+
+    <view class="btn-row">
+      <button class="btn" bindtap="retry">再来一组</button>
+      <button class="btn ghost" bindtap="goHome">回首页</button>
+    </view>
+  </block>
+</view>

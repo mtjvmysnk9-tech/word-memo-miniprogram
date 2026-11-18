@@ -1,0 +1,23 @@
+<view class="login">
+  <view class="logo">忆</view>
+  <view class="h2"><text style="font-size:44rpx;font-weight:600">忆单词</text></view>
+  <view class="sub">基于艾宾浩斯记忆曲线的英语单词记忆学习系统</view>
+
+  <view class="ltabs">
+    <view class="lt {{tab === 'user' ? 'on' : ''}}" data-tab="user" bindtap="switchTab">普通用户</view>
+    <view class="lt {{tab === 'admin' ? 'on' : ''}}" data-tab="admin" bindtap="switchTab">管理员</view>
+    <view class="lt {{tab === 'register' ? 'on' : ''}}" data-tab="register" bindtap="switchTab">注册</view>
+  </view>
+
+  <input class="linput" placeholder="账号" value="{{acc}}" bindinput="onAcc" confirm-type="next" />
+  <input class="linput" placeholder="密码" value="{{pwd}}" bindinput="onPwd" password="{{true}}" confirm-type="done" bindconfirm="doLogin" />
+  <input wx:if="{{tab === 'register'}}" class="linput" placeholder="昵称（选填）" value="{{nick}}" bindinput="onNick" />
+
+  <button class="btn" bindtap="doLogin" style="margin:40rpx 0 0">{{tab === 'register' ? '注册并登录' : '登录'}}</button>
+  <button class="btn soft" bindtap="doGuest" style="margin:20rpx 0 0">游客登录，先看看</button>
+
+  <view class="foot">
+    <view>演示账号 student / 123456 · 管理员 admin / admin123</view>
+    <view>纯前端演示版：学习数据保存在小程序本地缓存</view>
+  </view>
+</view>

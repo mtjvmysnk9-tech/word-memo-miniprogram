@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#07c160" />
+<title>忆单词 · 手机版（微信小程序风格）</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="stage">
+  <aside class="stage-side">
+    <div class="side-brand"><span class="dot"></span>忆单词 WordMemo</div>
+    <p class="side-desc">基于微信小程序的英语单词记忆学习系统 · 手机版 H5 界面（与小程序端同一套核心算法与词库）</p>
+    <nav class="side-links">
+      <a href="../index.html">项目主页</a>
+      <a href="../web/index.html">电脑版 Web</a>
+      <a href="../miniprogram/" rel="nofollow">小程序源码目录</a>
+      <a href="../docs/系统设计说明.md">系统设计说明</a>
+    </nav>
+    <div class="side-accounts">
+      <b>演示账号</b>
+      <div>管理员：admin / admin123</div>
+      <div>普通用户：student / 123456</div>
+      <div>也可以点「游客登录」直接体验</div>
+    </div>
+    <div class="side-note">提示：在手机上访问本页即为全屏 App 效果；在大屏浏览器里会以手机外壳预览，方便截图写进论文。</div>
+  </aside>
+
+  <div class="phone">
+    <div class="statusbar">
+      <span id="sb-time">9:41</span>
+      <span class="sb-right">
+        <i class="sig"></i><i class="wifi"></i><i class="bat"></i>
+      </span>
+    </div>
+
+    <header class="navbar" id="navbar">
+      <button class="nav-back" id="nav-back" hidden>&lt;</button>
+      <h1 id="nav-title">忆单词</h1>
+      <span class="capsule"><i class="cap-dot"></i><i class="cap-line"></i><i class="cap-sep"></i><i class="cap-circle"></i></span>
+    </header>
+
+    <main class="viewport" id="page"></main>
+
+    <nav class="tabbar" id="tabbar" hidden></nav>
+
+    <div class="layer" id="modal" hidden></div>
+    <div class="sheet" id="sheet" hidden></div>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+</div>
+
+<script src="../assets/wordbank.js"></script>
+<script src="../assets/core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

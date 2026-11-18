@@ -1,0 +1,100 @@
+<view class="wrap">
+  <!-- ① 学习入口 -->
+  <block wx:if="{{view === 'setup'}}">
+    <view class="card">
+      <view class="spread">
+        <text class="card-title" style="margin:0">今日新词进度</text>
+        <text class="muted small">{{todayNew}} / {{goal}}</text>
+      </view>
+      <view class="track" style="margin-top:14rpx"><i style="width:{{pct}}%"></i></view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">选择词库</view>
+      <view class="chips">
+        <view wx:for="{{banks}}" wx:key="id" class="chip {{item.on ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickBank">
+          {{item.name}} {{item.learned}}/{{item.total}}
+        </view>
+      </view>
+      <view class="muted small" style="margin-top:14rpx">《{{bankName}}》尚有 {{freshCount}} 个未学单词，每轮按每日目标 {{goal}} 词推进。</view>
+    </view>
+
+    <button class="btn" bindtap="startStudy">开始学新词</button>
+    <button class="btn soft" bindtap="startDue">复习到期单词（{{dueCount}}）</button>
+
+    <view class="kpis">
+      <view class="kpi"><view class="v">{{learnedCount}}</view><view class="l">已学词</view></view>
+      <view class="kpi"><view class="v">{{strongCount}}</view><view class="l">牢固词</view></view>
+      <view class="kpi"><view class="v">{{dueCount}}</view><view class="l">待复习</view></view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">九个记忆阶段</view>
+      <view class="muted small" style="line-height:1.9">初次识记 → 5 分钟 → 30 分钟 → 12 小时 → 1 天 → 2 天 → 4 天 → 7 天 → 15 天 → 30 天。自评越准，调度越贴近你的遗忘速度。</view>
+    </view>
+  </block>
+
+  <!-- ② 翻转卡学习 -->
+  <block wx:elif="{{view === 'card'}}">
+    <view class="card" style="margin-bottom:0">
+      <view class="spread">
+        <text class="muted small">{{modeName}}</text>
+        <text class="muted small">{{idx}} / {{total}} · 对 {{ok}} 错 {{bad}}</text>
+      </view>
+      <view class="track" style="margin-top:14rpx"><i style="width:{{barPct}}%"></i></view>
+    </view>
+
+    <view class="flip" bindtap="flip">
+      <view class="face" wx:if="{{!flipped}}">
+        <view><text class="tag">{{bankName}}</text></view>
+        <view class="word-big" style="margin-top:20rpx">{{word}}</view>
+        <view class="pho">{{phonetic}}<text class="spk" catchtap="speakNow">♪</text></view>
+        <view class="hint-c">点击卡片翻面查看释义</view>
+        <view class="srs-meta"><text>{{stageText}}</text><text>{{idx}} / {{total}}</text></view>
+      </view>
+      <view class="face" wx:else>
+        <view class="word-big" style="font-size:48rpx">{{word}} <text class="muted" style="font-size:28rpx">{{phonetic}}</text></view>
+        <view class="meaning">{{meaning}}</view>
+        <view class="example">
+          <text wx:for="{{parts}}" wx:key="index" class="{{item.hl ? 'hl' : ''}}">{{item.t}}</text>
+        </view>
+        <view class="srs-meta"><text>{{stageText}}</text><text>记忆度 {{strength}}%</text></view>
+      </view>
+    </view>
+
+    <view class="grades" wx:if="{{flipped}}">
+      <view wx:for="{{grades}}" wx:key="g" class="g {{item.cls}}" data-g="{{item.g}}" bindtap="grade">
+        <view class="t">{{item.t}}</view>
+        <view class="s">{{item.s}}</view>
+      </view>
+    </view>
+
+    <view class="btn-row" wx:if="{{flipped}}">
+      <button class="btn ghost" bindtap="toggleFav">{{isFav ? '取消收藏' : '加入收藏'}}</button>
+      <button class="btn ghost" bindtap="quit">结束本轮</button>
+    </view>
+    <view class="btn-row" wx:else>
+      <button class="btn" bindtap="flip">显示释义</button>
+      <button class="btn ghost" bindtap="quit">退出</button>
+    </view>
+  </block>
+
+  <!-- ③ 本轮结果 -->
+  <block wx:else>
+    <view class="result">
+      <view class="ring-wrap">
+        <view class="ring-txt">
+          <view class="p green">{{rate}}%</view>
+          <view class="q">本轮记住率</view>
+        </view>
+      </view>
+      <view style="font-size:34rpx;font-weight:500">{{modeName}}完成</view>
+      <view class="muted small" style="margin-top:10rpx">{{total}} 词 · 对 {{ok}} · 错 {{bad}} · 用时 {{seconds}} 秒</view>
+    </view>
+    <view wx:if="{{bad}}" class="notice">答错的 {{bad}} 个词已进入错词本，连续两次答对会自动移出。</view>
+    <view class="btn-row">
+      <button class="btn" bindtap="again">再来一轮</button>
+      <button class="btn ghost" bindtap="backHome">回首页</button>
+    </view>
+  </block>
+</view>

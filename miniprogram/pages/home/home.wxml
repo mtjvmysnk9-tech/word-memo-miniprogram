@@ -1,0 +1,78 @@
+<view class="wrap">
+  <view class="banner">
+    <picker mode="selector" range="{{banks}}" range-key="name" value="{{bankIndex}}" bindchange="onBankChange">
+      <view class="b1">当前词库 · {{bankName}}（点击切换）</view>
+    </picker>
+    <view class="b2">{{todayNew}} / {{goal}} 个新词</view>
+    <view class="b3">今日学习 {{doneToday}} 项 · 专注 {{minutes}} 分钟 · 连续打卡 {{streak}} 天</view>
+    <view class="bar"><i style="width:{{pct}}%"></i></view>
+  </view>
+
+  <view class="grid4">
+    <view class="g4" bindtap="go" data-url="/pages/study/study">
+      <view class="gi" style="background:#07c160">学</view>
+      <view class="gt">学新词</view>
+      <view class="gd">今日 {{freshCount}} 词可选</view>
+    </view>
+    <view class="g4" bindtap="go" data-url="/pages/review/review">
+      <view class="gi" style="background:#10aeff">复</view>
+      <view class="gt">待复习</view>
+      <view class="gd">{{dueCount}} 词到期</view>
+    </view>
+    <view class="g4" bindtap="go" data-url="/pages/quiz/quiz">
+      <view class="gi" style="background:#f5a623">测</view>
+      <view class="gt">单词测试</view>
+      <view class="gd">自动组卷判分</view>
+    </view>
+    <view class="g4" bindtap="go" data-url="/pages/review/review?tab=wrong">
+      <view class="gi" style="background:#fa5151">错</view>
+      <view class="gt">错词本</view>
+      <view class="gd">{{wrongCount}} 词待攻克</view>
+    </view>
+  </view>
+
+  <view wx:if="{{notice}}" class="notice">📢 {{notice}}</view>
+
+  <view class="group-title">今日概览</view>
+  <view class="kpis">
+    <view class="kpi"><view class="v">{{doneToday}}</view><view class="l">今日学习</view></view>
+    <view class="kpi"><view class="v">{{accRate}}%</view><view class="l">累计正确率</view></view>
+    <view class="kpi"><view class="v">{{favCount}}</view><view class="l">收藏</view></view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">近 7 天学习量</view>
+    <view class="bars">
+      <view class="bcol" wx:for="{{bars}}" wx:key="label">
+        <text class="bv">{{item.value}}</text>
+        <view class="bb" style="height:{{item.h}}rpx"></view>
+        <text class="bl">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="group">
+    <view class="cell arrow" bindtap="go" data-url="/pages/review/review?tab=fav">
+      <view class="ico" style="background:#ffc300">★</view>
+      <view class="bd"><view class="t">收藏单词</view><view class="d">{{favCount}} 个</view></view>
+      <view class="ft"></view>
+    </view>
+    <view class="cell arrow" bindtap="go" data-url="/pages/review/review?tab=bank">
+      <view class="ico" style="background:#3b6ef5">词</view>
+      <view class="bd"><view class="t">词库浏览与搜索</view><view class="d">高考 / 四级 / 六级 共 {{totalWords}} 词</view></view>
+      <view class="ft"></view>
+    </view>
+    <view class="cell arrow" bindtap="go" data-url="/pages/stats/stats">
+      <view class="ico" style="background:#8e5bf2">势</view>
+      <view class="bd"><view class="t">学习统计</view><view class="d">保持率 · 打卡热力图 · 掌握分布</view></view>
+      <view class="ft"></view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">记忆曲线怎么安排复习</view>
+    <view class="muted small">5 分钟 → 30 分钟 → 12 小时 → 1 天 → 2 天 → 4 天 → 7 天 → 15 天 → 30 天。每次自评后按结果升降级，达到第 4 级即计入记忆保持率。</view>
+  </view>
+
+  <view style="text-align:center;color:#b2b2b2;font-size:22rpx;padding:10rpx 0 30rpx">忆单词 v1.0.0 · 微信小程序端</view>
+</view>

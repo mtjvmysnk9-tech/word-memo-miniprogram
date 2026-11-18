@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>忆单词 · 英语单词记忆学习系统（电脑版）</title>
+    <meta name="description" content="基于微信小程序的英语单词记忆学习系统 —— 电脑网页版。艾宾浩斯记忆曲线调度、分级词库、自动组卷测试、错词本与学习统计。" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="login" class="login"></div>
+
+    <div id="app" class="app" hidden>
+      <aside class="side">
+        <div class="brand">
+          <span class="logo">忆</span>
+          <div>
+            <b>忆单词</b>
+            <i>WordMemo · 电脑版</i>
+          </div>
+        </div>
+        <nav id="nav" class="nav"></nav>
+        <div class="side-foot">
+          <div class="who" id="who"></div>
+          <button class="btn ghost sm" data-action="logout">退出登录</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="top">
+          <div>
+            <h1 id="page-title">概览</h1>
+            <p id="page-sub" class="sub"></p>
+          </div>
+          <div class="top-right">
+            <div class="search">
+              <input id="quick-search" placeholder="搜索单词 / 释义，回车查看" autocomplete="off" />
+            </div>
+            <a class="btn ghost sm" href="../m/" target="_blank">手机版</a>
+            <a class="btn ghost sm" href="../" target="_blank">项目主页</a>
+          </div>
+        </header>
+        <section id="view" class="view"></section>
+        <footer class="foot">
+          忆单词 WordMemo · 本科毕业设计演示系统 · 数据保存在本机浏览器，不会上传
+        </footer>
+      </main>
+    </div>
+
+    <div id="modal" class="modal" hidden>
+      <div class="modal-box">
+        <header><b id="modal-title"></b><button class="x" data-action="close-modal">×</button></header>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+    <div id="toast" class="toast"></div>
+
+    <script src="../assets/wordbank.js"></script>
+    <script src="../assets/core.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

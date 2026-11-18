@@ -1,0 +1,64 @@
+<view class="wrap">
+  <view class="mehead">
+    <view class="avatar" style="background:{{color}}">{{initial}}</view>
+    <view>
+      <view class="n">{{name}}</view>
+      <view class="s">{{account}} · {{roleText}}</view>
+    </view>
+  </view>
+
+  <view class="kpis">
+    <view class="kpi"><view class="v">{{learned}}</view><view class="l">已学词</view></view>
+    <view class="kpi"><view class="v">{{retention}}%</view><view class="l">保持率</view></view>
+    <view class="kpi"><view class="v">{{streak}}</view><view class="l">连续打卡</view></view>
+  </view>
+
+  <view class="group">
+    <view class="cell arrow" data-url="/pages/stats/stats" bindtap="go">
+      <view class="ico" style="background:#07c160">势</view>
+      <view class="bd"><view class="t">学习统计</view><view class="d">曲线 · 热力图 · 掌握分布 · 日志</view></view>
+      <view class="ft"></view>
+    </view>
+    <view class="cell arrow" data-url="/pages/review/review?tab=bank" bindtap="go">
+      <view class="ico" style="background:#f5a623">词</view>
+      <view class="bd"><view class="t">词库浏览</view><view class="d">{{totalWords}} 词</view></view>
+      <view class="ft"></view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">偏好设置</view>
+    <view class="spread" style="padding:12rpx 0">
+      <text>每日新词目标</text>
+      <input type="number" value="{{goal}}" bindblur="onGoal" style="width:120rpx;text-align:right;background:#f7f7f7;border-radius:10rpx;padding:8rpx 16rpx" />
+    </view>
+    <picker mode="selector" range="{{banks}}" range-key="name" value="{{bankIndex}}" bindchange="onBankChange">
+      <view class="spread" style="padding:12rpx 0">
+        <text>默认词库</text>
+        <text class="muted">{{banks[bankIndex].name}} ›</text>
+      </view>
+    </picker>
+    <view class="muted small" style="margin-top:10rpx">设置写入 {{bucket}}</view>
+  </view>
+
+  <view class="group" wx:if="{{isAdmin}}">
+    <view class="cell arrow" data-url="/pages/admin/admin" bindtap="go">
+      <view class="ico" style="background:#fa5151">管</view>
+      <view class="bd"><view class="t">管理后台</view><view class="d">用户 · 词库 · 公告 · 数据复位</view></view>
+      <view class="ft"></view>
+    </view>
+  </view>
+
+  <view class="group">
+    <view class="cell" bindtap="about">
+      <view class="ico" style="background:#8e5bf2">ℹ</view>
+      <view class="bd"><view class="t">关于本系统</view><view class="d">版本 / 算法 / 三端说明</view></view>
+    </view>
+  </view>
+
+  <view class="btn-row">
+    <button class="btn soft" bindtap="save">保存设置</button>
+    <button wx:if="{{!isGuest}}" class="btn ghost" bindtap="changePwd">修改密码</button>
+  </view>
+  <button class="btn warn" bindtap="logout">退出登录</button>
+</view>

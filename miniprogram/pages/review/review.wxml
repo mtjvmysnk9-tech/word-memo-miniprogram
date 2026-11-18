@@ -1,0 +1,40 @@
+<view class="wrap">
+  <scroll-view scroll-x="true" class="seg" style="flex-wrap:nowrap;white-space:nowrap;width:auto;margin:20rpx 24rpx">
+    <view wx:for="{{tabs}}" wx:key="id" class="s on-off {{item.id === tab ? 'on' : ''}}" data-id="{{item.id}}" bindtap="switchTab" style="display:inline-block;width:auto;padding:16rpx 26rpx;flex:none">
+      {{item.t}}({{item.n}})
+    </view>
+  </scroll-view>
+
+  <view class="searchbar">
+    <input placeholder="搜索单词或释义" value="{{kw}}" bindinput="onKw" confirm-type="search" />
+  </view>
+
+  <view wx:if="{{tab === 'bank'}}" style="padding:0 24rpx">
+    <view class="chips">
+      <view wx:for="{{banks}}" wx:key="id" class="chip {{item.on ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickBank">{{item.name}}</view>
+    </view>
+  </view>
+
+  <button wx:if="{{canStart}}" class="btn" bindtap="start">开始复习（{{startCount}} 词）</button>
+
+  <view wx:if="{{list.length}}" class="group">
+    <view class="wline" wx:for="{{list}}" wx:key="id">
+      <view class="w">{{item.word}}</view>
+      <view class="m">{{item.meaning}}</view>
+      <view class="s {{item.due ? 'due' : ''}}">{{item.stage}} {{item.strength}}%</view>
+      <view class="spk" data-w="{{item.word}}" bindtap="speak" style="margin-left:12rpx">♪</view>
+      <view class="spk {{item.fav ? '' : 'dim'}}" data-id="{{item.id}}" bindtap="toggleFav" style="margin-left:8rpx">★</view>
+    </view>
+  </view>
+  <view wx:else class="empty">
+    <view class="box"></view>
+    <view>这个范围暂时还没有单词</view>
+    <view class="small" style="margin-top:8rpx">先去「学习」页学几个新词吧</view>
+  </view>
+
+  <view wx:if="{{pages > 1}}" class="spread" style="padding:24rpx 40rpx">
+    <button class="btn ghost mini" bindtap="prev" disabled="{{page === 1}}">上一页</button>
+    <text class="muted small">{{page}} / {{pages}}</text>
+    <button class="btn ghost mini" bindtap="next" disabled="{{page === pages}}">下一页</button>
+  </view>
+</view>

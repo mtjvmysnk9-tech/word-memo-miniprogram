@@ -1,0 +1,110 @@
+<view class="wrap">
+  <view class="seg">
+    <view class="s {{tab === 'overview' ? 'on' : ''}}" data-tab="overview" bindtap="switchTab">概览</view>
+    <view class="s {{tab === 'users' ? 'on' : ''}}" data-tab="users" bindtap="switchTab">用户</view>
+    <view class="s {{tab === 'words' ? 'on' : ''}}" data-tab="words" bindtap="switchTab">词库</view>
+    <view class="s {{tab === 'sys' ? 'on' : ''}}" data-tab="sys" bindtap="switchTab">系统</view>
+  </view>
+
+  <!-- 概览 -->
+  <block wx:if="{{tab === 'overview'}}">
+    <view class="kpis">
+      <view class="kpi"><view class="v">{{totalUsers}}</view><view class="l">注册用户</view></view>
+      <view class="kpi"><view class="v">{{totalLearned}}</view><view class="l">全站已学词次</view></view>
+      <view class="kpi"><view class="v">{{totalAnswers}}</view><view class="l">累计作答</view></view>
+    </view>
+    <view class="group-title">词库构成</view>
+    <view class="group">
+      <view class="cell" wx:for="{{bankRows}}" wx:key="id">
+        <view class="bd">
+          <view class="t">{{item.name}}</view>
+          <view class="d">{{item.desc}}</view>
+        </view>
+        <view class="ft">{{item.count}} 词</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 用户 -->
+  <block wx:elif="{{tab === 'users'}}">
+    <view class="group">
+      <view wx:for="{{users}}" wx:key="uid">
+        <view class="cell">
+          <view class="ico" style="background:{{item.color}}">{{item.initial}}</view>
+          <view class="bd">
+            <view class="t">{{item.nickname}} · {{item.account}}</view>
+            <view class="d">{{item.role}} · 已学 {{item.learned}} 词 · {{item.status ? '正常' : '已停用'}}</view>
+          </view>
+        </view>
+        <view class="cell" style="padding-top:0">
+          <view class="bd"></view>
+          <button class="btn ghost mini" data-uid="{{item.uid}}" bindtap="resetPwd">重置密码</button>
+          <button class="btn ghost mini" style="margin-left:12rpx" data-uid="{{item.uid}}" bindtap="toggleStatus">{{item.status ? '停用' : '恢复'}}</button>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 词库 -->
+  <block wx:elif="{{tab === 'words'}}">
+    <view class="card">
+      <view class="card-title">新增单词（写入《{{bankName}}》）</view>
+      <view class="chips">
+        <view wx:for="{{banks}}" wx:key="id" class="chip {{item.on ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickBank">{{item.name}}</view>
+      </view>
+      <view class="field" style="padding:14rpx 0"><view class="lab">单词</view><input class="f-in" data-f="wWord" value="{{wWord}}" bindinput="onField" placeholder="abandon" /></view>
+      <view class="field" style="padding:14rpx 0"><view class="lab">音标</view><input class="f-in" data-f="wPho" value="{{wPho}}" bindinput="onField" placeholder="/əˈbændən/" /></view>
+      <view class="field" style="padding:14rpx 0"><view class="lab">释义</view><input class="f-in" data-f="wMean" value="{{wMean}}" bindinput="onField" placeholder="v. 放弃；抛弃" /></view>
+      <view class="field" style="padding:14rpx 0"><view class="lab">例句</view><input class="f-in" data-f="wEx" value="{{wEx}}" bindinput="onField" placeholder="He had to abandon the plan." /></view>
+      <view class="btn-row" style="margin:20rpx 0 0">
+        <button class="btn" bindtap="addWord">添加</button>
+      </view>
+    </view>
+
+    <view class="group-title">自定义词（{{custom.length}}）· 三端共用</view>
+    <view class="group" wx:if="{{custom.length}}">
+      <view class="wline" wx:for="{{custom}}" wx:key="id">
+        <view class="w">{{item.word}}</view>
+        <view class="m">{{item.meaning}}</view>
+        <button class="btn warn mini" data-id="{{item.id}}" bindtap="delWord">删除</button>
+      </view>
+    </view>
+    <view wx:else class="empty"><view class="box"></view>该词库还没有自定义词</view>
+
+    <view class="card">
+      <view class="card-title">批量导入 CSV</view>
+      <view class="muted small">每行 word,phonetic,meaning,example，可用引号包裹含逗号的字段；重复词自动跳过。</view>
+      <textarea class="f-in" style="height:200rpx;margin-top:14rpx" value="{{csv}}" bindinput="onField" data-f="csv"
+        placeholder="apple,/&#230;pl/,n. 苹果,An apple a day."></textarea>
+      <button class="btn soft" bindtap="importCsv" style="margin:16rpx 0 0">导入到《{{bankName}}》</button>
+    </view>
+  </block>
+
+  <!-- 系统 -->
+  <block wx:else>
+    <view class="card">
+      <view class="card-title">系统公告</view>
+      <textarea class="f-in" style="height:160rpx" value="{{notice}}" bindinput="onNotice"></textarea>
+      <button class="btn" bindtap="saveNotice" style="margin:16rpx 0 0">保存公告</button>
+    </view>
+
+    <view class="card">
+      <view class="card-title">记忆曲线参数</view>
+      <view class="tbl">
+        <view class="tr"><text class="th">阶段</text><text class="th">间隔</text></view>
+        <view class="tr" wx:for="{{intervals}}" wx:key="i">
+          <text>{{item.i + 1}} · {{item.name}}</text><text>{{item.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">运行环境</view>
+      <view class="muted small" style="line-height:1.9">存储后端 / 词库规模：{{env}}</view>
+      <view class="muted small" style="line-height:1.9">内核：utils/core.js（Store · SRS · Auth · Repo · Quiz · Stats · CMS）</view>
+      <view class="muted small" style="line-height:1.9">发音：wx.createInnerAudioContext + 有道词典音频接口（需在后台配置 request 域名白名单）</view>
+    </view>
+
+    <button class="btn warn" bindtap="resetAll">清空本机全部数据</button>
+  </block>
+</view>

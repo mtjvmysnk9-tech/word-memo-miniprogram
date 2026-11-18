@@ -1,0 +1,72 @@
+<view class="wrap">
+  <view class="kpis">
+    <view class="kpi"><view class="v">{{learned}}</view><view class="l">已学词数</view></view>
+    <view class="kpi"><view class="v">{{accuracy}}%</view><view class="l">答对率</view></view>
+    <view class="kpi"><view class="v">{{minutes}}′</view><view class="l">累计时长</view></view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">近 14 天学习量</view>
+    <view class="bars">
+      <view class="bcol" wx:for="{{bars}}" wx:key="index">
+        <text class="bv">{{item.value}}</text>
+        <view class="bb" style="height:{{item.h}}rpx"></view>
+        <text class="bl">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">记忆保持率</view>
+    <view class="rowx" style="gap:12rpx">
+      <text class="green" style="font-size:52rpx;font-weight:600">{{retention}}%</text>
+      <text class="muted small">已学 {{learnedTotal}} 词中 {{solid}} 词进入 1 天以上保持期</text>
+    </view>
+    <view class="dist">
+      <i wx:for="{{dist}}" wx:key="label" style="background:{{item.color}};width:{{item.w}}%"></i>
+    </view>
+    <view class="legend">
+      <view class="lg" wx:for="{{dist}}" wx:key="label"><em style="background:{{item.color}}"></em>{{item.label}} {{item.n}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">打卡热力图（近 40 天）</view>
+    <view class="heat">
+      <view class="hc {{item.level}}" wx:for="{{heat}}" wx:key="date"></view>
+    </view>
+    <view class="legend" style="margin-top:16rpx">
+      <view class="lg"><em style="background:#eef0f2"></em>0</view>
+      <view class="lg"><em style="background:#b8ecce"></em>少</view>
+      <view class="lg"><em style="background:#26c96f"></em>多</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">各记忆阶段词数</view>
+    <view class="hbars">
+      <view class="hrow" wx:for="{{stages}}" wx:key="i">
+        <text class="hl2">{{item.name}}</text>
+        <view class="ht"><i style="width:{{item.w}}%"></i></view>
+        <text class="hn">{{item.n}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">每日日志（近 10 天）</view>
+    <view class="tbl">
+      <view class="tr"><text class="th">日期</text><text class="th">新学</text><text class="th">复习</text><text class="th">测试</text><text class="th">分钟</text></view>
+      <view class="tr" wx:for="{{logs}}" wx:key="k">
+        <text>{{item.k}}</text><text>{{item.d.new}}</text><text>{{item.d.review}}</text><text>{{item.d.quiz}}</text><text>{{item.d.minutes}}</text>
+      </view>
+      <view wx:if="{{!logs.length}}" class="muted small" style="padding:16rpx 0">还没有学习记录</view>
+    </view>
+  </view>
+
+  <view class="kpis">
+    <view class="kpi"><view class="v">{{streak}}</view><view class="l">连续打卡</view></view>
+    <view class="kpi"><view class="v">{{todayNew}}</view><view class="l">今日新学</view></view>
+    <view class="kpi"><view class="v">{{due}}</view><view class="l">待复习</view></view>
+  </view>
+</view>
