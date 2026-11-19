@@ -64,8 +64,11 @@ App({
     if (!this._audio) {
       this._audio = wx.createInnerAudioContext();
       this._audio.obeyMuteSwitch = false;
+      this._audio.onError(() => this.toast('发音加载失败：请在详情-本地设置里取消「校验请求域名」'));
     }
-    this._audio.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=1';
+    const url = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=1';
+    if (this._audio.src === url) this._audio.stop();
+    this._audio.src = url;
     this._audio.play();
   },
 

@@ -104,10 +104,32 @@
   }
   function closeSheet() { $('#sheet').hidden = true; }
 
+  var audio = null;
+  var speakSeq = 0;
+  function accent() { return (S.P && S.P.settings && S.P.settings.accent) || 'en-US'; }
+  /** 浏览器朗读依赖本机语音包，缺包时静默无声，所以优先放有道真人音频，失败才回退 */
   function speak(word) {
-    if (!('speechSynthesis' in window)) return toast('当前内核不支持朗读');
-    var u = new SpeechSynthesisUtterance(String(word));
-    u.lang = 'en-US';
+    word = String(word || '').trim();
+    if (!word) return;
+    if (!audio) audio = new Audio();
+    var seq = ++speakSeq, fell = false;
+    function fallback() {
+      if (seq !== speakSeq || fell) return;
+      fell = true;
+      speakBySynth(word);
+    }
+    audio.onerror = fallback;
+    audio.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) +
+      '&type=' + (accent() === 'en-GB' ? 2 : 1);
+    var p = audio.play();
+    if (p && p.catch) p.catch(fallback);
+  }
+  function speakBySynth(word) {
+    if (!('speechSynthesis' in window) || !window.speechSynthesis.getVoices().length) {
+      return toast('本机没有可用的英文语音包，发音无声');
+    }
+    var u = new SpeechSynthesisUtterance(word);
+    u.lang = accent();
     u.rate = 0.85;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
