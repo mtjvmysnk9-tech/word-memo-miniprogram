@@ -4,7 +4,7 @@
 
 一套艾宾浩斯间隔重复内核，三个客户端：电脑网页版、手机网页版、微信小程序。全部纯静态实现，不依赖后端与构建工具，学习数据只存在使用者本机。
 
-在线地址：https://mtjvmysnk9-tech.github.io/word-memo-miniprogram/
+在线地址：电脑版 https://mtjvmysnk9-tech.github.io/word-memo-miniprogram/web/ 、手机版 https://mtjvmysnk9-tech.github.io/word-memo-miniprogram/m/
 
 ## 要点
 
@@ -19,12 +19,10 @@
 
 | 目录 | 内容 |
 | --- | --- |
-| `index.html` | 站点首页，三端入口与说明 |
 | `assets/` | 词库数据 `wordbank.js` + 共享内核 `core.js` |
 | `web/` | 电脑网页版 |
 | `m/` | 手机网页版（小程序同款界面） |
 | `miniprogram/` | 微信小程序工程，8 个页面 + `app.json` + `utils/` |
-| `docs/` | 系统设计说明（架构、数据模型、算法、流程、测试用例） |
 | `tools/` | 小程序端逻辑自检脚本，`node tools/selfcheck.js` 跑 95 项断言 |
 
 ## 部署的两处差别
